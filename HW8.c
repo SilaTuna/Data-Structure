@@ -1,52 +1,51 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#define MAX 100
+#include <stdbool.h>
 
-int stack[MAX];
-int top = -1;
+#define V 6
 
-void push(int val) {
-    stack[++top] = val;
-}
+void findCluster(int graph[V][V], int v, bool visited[], int clusterID) {
+    visited[v] = true;
+    printf("%d ", v);
 
-int pop() {
-    return stack[top--];
-}
-
-int isEmpty() {
-    return top == -1;
-}
-
-int evaluatePostfix(char* exp) {
-    for (int i = 0; exp[i] != '\0'; i++) {
-        char c = exp[i];
-
-        if (isdigit(c)) {
-            push(c - '0');
-        }
-        else {
-            int val2 = pop();
-            int val1 = pop();
-
-            switch (c) {
-                case '+': push(val1 + val2); break;
-                case '-': push(val1 - val2); break;
-                case '*': push(val1 * val2); break;
-                case '/': push(val1 / val2); break;
-            }
+    for (int i = 0; i < V; i++) {
+        if (graph[v][i] == 1 && !visited[i]) {
+            findCluster(graph, i, visited, clusterID);
         }
     }
-    return pop();
+}
+
+void extractClusters(int graph[V][V]) {
+    bool visited[V];
+    
+    for (int i = 0; i < V; i++) {
+        visited[i] = false;
+    }
+
+    int clusterCount = 0;
+    printf("Graf üzerindeki kümeler:\n");
+
+    for (int i = 0; i < V; i++) {
+        if (!visited[i]) {
+            clusterCount++;
+            printf("Küme %d: ", clusterCount);
+            findCluster(graph, i, visited, clusterCount);
+            printf("\n");
+        }
+    }
+    printf("\nToplam bulunan küme sayısı: %d\n", clusterCount);
 }
 
 int main() {
-    char exp[MAX];
-    printf("Hesaplanacak Postfix ifadeyi giriniz (Orn: 96*4-): ");
-    scanf("%s", exp);
+    int graph[V][V] = {
+        {0, 1, 1, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 0},
+        {0, 0, 0, 1, 0, 0},
+        {0, 0, 0, 0, 0, 0}
+    };
 
-    int result = evaluatePostfix(exp);
-    printf("Sonuc: %d\n", result);
+    extractClusters(graph);
 
     return 0;
 }
