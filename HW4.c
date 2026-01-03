@@ -1,29 +1,90 @@
 #include <stdio.h>
+//MAX Heap
+int size = 0;
 
-void tower_of_hanoi(int n, int baslangicCubuk, int hedefCubuk, int gecici) {
-    if (n == 0) {
-        return;
+void swap(int *a, int *b) {
+    int temp = *b;
+    *b = *a;
+    *a = temp;
+}
+
+void maxHeapify(int array[], int size, int i) {
+    int largest = i;
+    int l = 2 * i + 1;
+    int r = 2 * i + 2;
+
+    if (l < size && array[l] > array[largest])
+        largest = l;
+    if (r < size && array[r] > array[largest])
+        largest = r;
+
+    if (largest != i) {
+        swap(&array[i], &array[largest]);
+        maxHeapify(array, size, largest);
     }
-    
-    tower_of_hanoi(n - 1, baslangicCubuk, gecici, hedefCubuk);
-    
-	printf("Diski %d numarali %d cubugundan %d cubuguna tasi\n", n, baslangicCubuk, hedefCubuk);  //sabit oldugu icin O(1)
-	
-	tower_of_hanoi(n - 1, gecici, hedefCubuk, baslangicCubuk); // n-1 iki defa çalýþýyor
 }
 
-int main(){
-	
-	tower_of_hanoi(3, 1, 3, 2);
-	return 0;
+void insert(int array[], int newNum) {
+    if (size == 0) {
+        array[0] = newNum;
+        size += 1;
+    } else {
+        array[size] = newNum;
+        size += 1;
+        for (int i = size / 2 - 1; i >= 0; i--) {
+            maxHeapify(array, size, i);
+        }
+    }
 }
-/* Zaman denklemi su sekilde olur :
-	S(n) = 2 × S(n-1) + O(1)  */
 
-/* Buradan denklem
-	S(n) = 2S(n-1) + 1
-	S(n) = 2(2S(n-2)+ 1 + 1 = 4S(n-2) + 3
-	S(n) = 2^kS(n-k)+(2^k-1)
-	S(n) = 2^n -1 sonucuna ulasir.
-	
-	Time Complexity = O(2^n) olur*/
+void printArray(int array[], int size) {
+    for (int i = 0; i < size; ++i)
+        printf("%d ", array[i]);
+    printf("\n");
+}
+
+int main() {
+    int array[10];
+
+    insert(array, 3);
+    insert(array, 9);
+    insert(array, 2);
+    insert(array, 1);
+    insert(array, 4);
+    insert(array, 5);
+
+    printf("Max-Heap: ");
+    printArray(array, size);
+
+    return 0;
+}
+
+//MIN Heap
+void minHeapify(int array[], int size, int i) {
+    int smallest = i;
+    int l = 2 * i + 1;
+    int r = 2 * i + 2;
+
+    if (l < size && array[l] < array[smallest])
+        smallest = l;
+    if (r < size && array[r] < array[smallest])
+        smallest = r;
+
+    if (smallest != i) {
+        swap(&array[i], &array[smallest]);
+        minHeapify(array, size, smallest);
+    }
+}
+
+void insertMinHeap(int array[], int newNum) {
+    if (size == 0) {
+        array[0] = newNum;
+        size += 1;
+    } else {
+        array[size] = newNum;
+        size += 1;
+        for (int i = size / 2 - 1; i >= 0; i--) {
+            minHeapify(array, size, i);
+        }
+    }
+}
