@@ -1,104 +1,94 @@
 #include <stdio.h>
-#define MAX 100
+#include <stdlib.h>
 
-int arr[MAX];
-int size = 0;
+struct Element {
+    int row;
+    int col;
+    int value;
+};
 
-//Ekleme(Insert)
-void insert(int value){
-	if(size == MAX) {
-		printf("Diziye ekleme yapilamadi. Dizi dolu!\n");
-		return;
-	}
-	arr[size] = value;
-	size++;
+struct SparseMatrix {
+    int rows;
+    int cols;
+    int numElements;
+    struct Element* elements;
+};
+
+struct SparseMatrix newSparseMatrix(int rows, int cols, int numElements) {
+    struct SparseMatrix s;
+    s.rows = rows;
+    s.cols = cols;
+    s.numElements = numElements;
+    s.elements = (struct Element*)malloc(numElements * sizeof(struct Element));
+    return s;
 }
 
-//Silme(Delete)
-void delete(int value){
-	int i, j;
-	for (i=0; i< size; i++){
-		if(arr[i] == value){
-			for(j = i; j < size -1; j++){
-				arr[j] = arr[j +1];
-			}
-			size--;
-		printf("%d Silindi.\n", value);
-		return;
-		}
-	}
-	printf("%d Girilen veri bulunamadi, silinemedi.\n", value);
-}
-
-//Arama(search)
-int search(int value){
-	for(int i = 0; i < size; i++){
-		if(arr[i] == value){
-			return i;
-		}
-	}
-	return -1;
-}
-
-void printArray(){
-	printf("Dizi: ");
-    for (int i = 0; i < size; i++) {
-        printf("%d ", arr[i]);
+void printSparseMatrix(struct SparseMatrix s) {
+    int k = 0;
+    for (int i = 0; i < s.rows; i++) {
+        for (int j = 0; j < s.cols; j++) {
+            if (k < s.numElements && s.elements[k].row == i && s.elements[k].col == j) {
+                printf("%d ", s.elements[k].value);
+                k++;
+            } else {
+                printf("0 ");
+            }
+        }
+        printf("\n");
     }
-    printf("\n");
 }
 
-int main(){
-	
-	int n, value;
-	
-	printf("Dizinin eleman sayisini giriniz: ");
-	scanf("%d", &n);
-	
-	for(int i = 0; i < n; i++){
-		printf("arr[%d] =", i);
-		scanf("%d",&value);
-		insert(value);
-	}
-	
-	int choice;
-	
-	do {
-		printf("\n MENU \n");
-		printf("1. Eleman ekle \n");
-        printf("2. Eleman sil \n");
-        printf("3. Eleman ara \n");
-        printf("4. Diziyi yazdir \n");
-        printf("0. Cikis \n");
-        printf("Seciminiz : ");
-        scanf("%d", &choice);
-        
-        switch(choice) {
-        	case 1:
-        		printf("Eklemek istediginiz sayiyi girin: ");
-                scanf("%d", &value);
-                insert(value);
-                break;
-            case 2:
-                printf("Silmek istediginiz sayiyi girin: ");
-                scanf("%d", &value);
-                delete(value);
-                break;
-            case 3:
-                printf("Aradiginiz sayiyi girin: ");
-                scanf("%d", &value);
-                search(value);
-                break;
-            case 4:
-                printArray();
-                break;
-            case 0:
-                printf("Cikis yapiliyor...\n");
-                break;
-            default:
-                printf("Hatali secim, tekrar deneyin!\n");
-		}
-	}while (choice != 0);
+int main() {
+    int rows, cols;
+
+    printf("Matrisin satir sayisini girin: ");
+    scanf("%d", &rows);
+    printf("Matrisin sutun sayisini girin: ");
+    scanf("%d", &cols);
+
+    int** matrix = (int**)malloc(rows * sizeof(int*));
+    for (int i = 0; i < rows; i++) {
+        matrix[i] = (int*)malloc(cols * sizeof(int));
+    }
+
+    printf("Matrisin elemanlarini girin (%d x %d):\n", rows, cols);
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            scanf("%d", &matrix[i][j]);
+        }
+    }
+
+    int elemanSayisi = 0;
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            if (matrix[i][j] != 0) {
+                elemanSayisi++;
+            }
+        }
+    }
+
+    struct SparseMatrix s = newSparseMatrix(rows, cols, elemanSayisi);
+
+    int k = 0;
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            if (matrix[i][j] != 0) {
+                s.elements[k].row = i;
+                s.elements[k].col = j;
+                s.elements[k].value = matrix[i][j];
+                k++;
+            }
+        }
+    }
+
+    printf("\nSparse Matrix:\n");
+    printSparseMatrix(s);
+
+    for (int i = 0; i < rows; i++) {
+        free(matrix[i]);
+    }
+    free(matrix);
+    free(s.elements);
 
     return 0;
 }

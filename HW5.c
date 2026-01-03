@@ -4,40 +4,57 @@
 typedef struct Node {
     int data;
     struct Node* next;
+    struct Node* prev;
 } node;
 
-node* create_linkedlist(int data) {
+node* create_node(int data) {
     node* n = (node*)malloc(sizeof(node));
     n->data = data;
     n->next = NULL;
+    n->prev = NULL;
     return n;
 }
 
 void write_linkedlist(node* n) {
     node* temp = n;
+    node* last = NULL;
+
+    printf("Ileri: ");
     while (temp != NULL) {
         printf("%d ", temp->data);
+        last = temp;
         temp = temp->next;
+    }
+    
+    printf("\nGeri:  ");
+    while (last != NULL) {
+        printf("%d ", last->data);
+        last = last->prev;
     }
     printf("\n----\n");
 }
 
-void add_node_head_of_linkedlist(node** linkedlist, int data) {
-    node* new_node = create_linkedlist(data);
-    new_node->next = *linkedlist;
+void add_node_head(node** linkedlist, int data) {
+    node* new_node = create_node(data);
+    if (*linkedlist != NULL) {
+        new_node->next = *linkedlist;
+        (*linkedlist)->prev = new_node;
+    }
     *linkedlist = new_node;
 }
 
-void add_node_end_of_linkedlist(node** linkedlist, int data) {
+void add_node_end(node** linkedlist, int data) {
+    node* new_node = create_node(data);
     if (*linkedlist == NULL) {
-        *linkedlist = create_linkedlist(data);
+        *linkedlist = new_node;
         return;
     }
     node* temp = *linkedlist;
     while (temp->next != NULL) {
         temp = temp->next;
     }
-    temp->next = create_linkedlist(data);
+    temp->next = new_node;
+    new_node->prev = temp;
 }
 
 void add_node_after_value(node* linkedlist, int after_data, int new_data) {
@@ -45,77 +62,60 @@ void add_node_after_value(node* linkedlist, int after_data, int new_data) {
     while (temp != NULL && temp->data != after_data) {
         temp = temp->next;
     }
-    if (temp == NULL) {
-        printf("Value %d not found. Cannot insert.\n", after_data);
-        return;
-    }
-    node* new_node = create_linkedlist(new_data);
+    
+    if (temp == NULL) return;
+
+    node* new_node = create_node(new_data);
     new_node->next = temp->next;
+    new_node->prev = temp;
+
+    if (temp->next != NULL) {
+        temp->next->prev = new_node;
+    }
     temp->next = new_node;
 }
 
-
-void delete_node_from_linkedlist(node** linkedlist, int data) {
-    if (*linkedlist == NULL) {
-        printf("Linked list is empty.\n");
-        return;
-    }
+void delete_node(node** linkedlist, int data) {
+    if (*linkedlist == NULL) return;
 
     node* temp = *linkedlist;
-    node* prev = NULL;
 
-    // Begining
-    if (temp != NULL && temp->data == data) {
-        *linkedlist = temp->next;
-        free(temp);
-        return;
-    }
-
-    // Inside
     while (temp != NULL && temp->data != data) {
-        prev = temp;
         temp = temp->next;
     }
 
-    // Not found
-    if (temp == NULL) {
-        printf("Data %d not found.\n", data);
-        return;
+    if (temp == NULL) return;
+
+    if (*linkedlist == temp) {
+        *linkedlist = temp->next;
     }
 
+    if (temp->next != NULL) {
+        temp->next->prev = temp->prev;
+    }
 
-    prev->next = temp->next;
+    if (temp->prev != NULL) {
+        temp->prev->next = temp->next;
+    }
+
     free(temp);
 }
 
 int main() {
-    node* root = create_linkedlist(3);
-    add_node_head_of_linkedlist(&root, 4);
-    add_node_head_of_linkedlist(&root, 5);
-    add_node_head_of_linkedlist(&root, 1);
-    add_node_end_of_linkedlist(&root, 6);
+    node* root = NULL;
 
-    printf("Initial linked list:\n");
+    add_node_end(&root, 10);
+    add_node_end(&root, 20);
+    add_node_head(&root, 5);
+    add_node_after_value(root, 10, 15);
+
     write_linkedlist(root);
 
-	// Begining
-    add_node_head_of_linkedlist(&root, 9);
-    // End
-    add_node_end_of_linkedlist(&root, 7);
-    // Inside
-    add_node_after_value(root, 4, 99);
+    delete_node(&root, 5);
+    delete_node(&root, 15);
+    delete_node(&root, 20);
 
-    printf("After insertions:\n");
-    write_linkedlist(root);
-
-    
-    delete_node_from_linkedlist(&root, 1);
-    delete_node_from_linkedlist(&root, 99);
-    delete_node_from_linkedlist(&root, 7);
-
-    printf("After deletions:\n");
     write_linkedlist(root);
 
     return 0;
 }
-
