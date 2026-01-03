@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdio.lib>
 
 void tower_of_hanoi(int n, int baslangicCubuk, int hedefCubuk, int gecici) {
     if (n == 0) {
@@ -8,15 +7,14 @@ void tower_of_hanoi(int n, int baslangicCubuk, int hedefCubuk, int gecici) {
     
     tower_of_hanoi(n - 1, baslangicCubuk, gecici, hedefCubuk);
     
-	printf("Diski %d numarali %d cubugundan %d cubuguna tasi\n", n, baslangicCubuk, hedefCubuk);  //sabit oldugu icin O(1)
-	
-	tower_of_hanoi(n - 1, gecici, hedefCubuk, baslangicCubuk); // n-1 iki defa çalýþýyor
+    printf("Diski %d: %d. cubuk -> %d. cubuk\n", n, baslangicCubuk, hedefCubuk);
+    
+    tower_of_hanoi(n - 1, gecici, hedefCubuk, baslangicCubuk);
 }
 
-int main(){
-	
-	tower_of_hanoi(3, 1, 3, 2);
-	return 0;
+int main() {
+    tower_of_hanoi(3, 1, 3, 2);
+    return 0;
 }
 /* Zaman denklemi su sekilde olur :
 	S(n) = 2 × S(n-1) + O(1)  */
