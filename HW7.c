@@ -1,56 +1,51 @@
 #include <stdio.h>
-#include <stdlib.h>
 
-typedef struct Node {
-    int data;
-    struct Node* next;
-} Node;
+#define MAX 10
 
-Node* newNode(int data) {
-    Node* temp = (Node*)malloc(sizeof(Node));
-    if (temp == NULL) {
-        perror("Bellek ayirma hatasi");
-        exit(EXIT_FAILURE);
+void diziyiYazdir(int arr[], int n) {
+    printf("Dizi: ");
+    for (int i = 0; i < n; i++) {
+        printf("%d ", arr[i]);
     }
-    temp->data = data;
-    temp->next = NULL;
-    return temp;
+    printf("\n");
 }
 
-void searchRecursive(Node* head, int aranan) {
-    if (head == NULL) {
-        printf("Sonuc: %d listede yok.\n", aranan);
+void elemanEkle(int arr[], int *n, int kapasite, int yeniSayi, int index) {
+    if (*n >= kapasite || index < 0 || index > *n) {
         return;
     }
 
-    if (head->data == aranan) {
-        printf("Sonuc: %d bulundu! ", aranan, (void*)head);
+    for (int i = *n; i > index; i--) {
+        arr[i] = arr[i - 1];
+    }
+
+    arr[index] = yeniSayi;
+    (*n)++;
+}
+
+void elemanSil(int arr[], int *n, int index) {
+    if (*n <= 0 || index < 0 || index >= *n) {
         return;
     }
 
-    searchRecursive(head->next, aranan);
+    for (int i = index; i < *n - 1; i++) {
+        arr[i] = arr[i + 1];
+    }
+
+    (*n)--;
 }
 
 int main() {
-    Node* head = newNode(10);
-    head->next = newNode(20);
-    head->next->next = newNode(30);
-    head->next->next->next = newNode(40);
+    int dizi[MAX] = {10, 20, 30, 40, 50};
+    int mevcutBoyut = 5;
 
-    printf("Liste: 10 -> 20 -> 30 -> 40\n\n");
+    diziyiYazdir(dizi, mevcutBoyut);
 
-    searchRecursive(head, 30);
-    searchRecursive(head, 99);
-    
-    printf("\n");
+    elemanEkle(dizi, &mevcutBoyut, MAX, 99, 2);
+    diziyiYazdir(dizi, mevcutBoyut);
 
-    Node* current = head;
-    Node* next;
-    while (current != NULL) {
-        next = current->next;
-        free(current);
-        current = next;
-    }
+    elemanSil(dizi, &mevcutBoyut, 4);
+    diziyiYazdir(dizi, mevcutBoyut);
 
     return 0;
 }
