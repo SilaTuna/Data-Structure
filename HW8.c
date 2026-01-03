@@ -1,51 +1,98 @@
 #include <stdio.h>
-#include <stdbool.h>
+#include <stdlib.h>
 
-#define V 6
+struct Node {
+    int dest;
+    struct Node* next;
+};
 
-void findCluster(int graph[V][V], int v, bool visited[], int clusterID) {
-    visited[v] = true;
-    printf("%d ", v);
+struct Graph {
+    int numVertices;
+    struct Node** adjLists;
+    int* visited;
+};
 
-    for (int i = 0; i < V; i++) {
-        if (graph[v][i] == 1 && !visited[i]) {
-            findCluster(graph, i, visited, clusterID);
+struct Node* createNode(int dest) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->dest = dest;
+    newNode->next = NULL;
+    return newNode;
+}
+
+struct Graph* createGraph(int vertices) {
+    struct Graph* graph = (struct Graph*)malloc(sizeof(struct Graph));
+    graph->numVertices = vertices;
+
+    graph->adjLists = (struct Node**)malloc(vertices * sizeof(struct Node*));
+    graph->visited = (int*)malloc(vertices * sizeof(int));
+
+    for (int i = 0; i < vertices; i++) {
+        graph->adjLists[i] = NULL;
+        graph->visited[i] = 0;
+    }
+    return graph;
+}
+
+void addEdge(struct Graph* graph, int src, int dest) {
+    struct Node* newNode = createNode(dest);
+    newNode->next = graph->adjLists[src];
+    graph->adjLists[src] = newNode;
+
+    newNode = createNode(src);
+    newNode->next = graph->adjLists[dest];
+    graph->adjLists[dest] = newNode;
+}
+
+void DFS(struct Graph* graph, int vertex) {
+    struct Node* adjList = graph->adjLists[vertex];
+    struct Node* temp = adjList;
+
+    graph->visited[vertex] = 1;
+    printf("V%d ", vertex + 1);
+
+    while (temp != NULL) {
+        int connectedVertex = temp->dest;
+
+        if (graph->visited[connectedVertex] == 0) {
+            DFS(graph, connectedVertex);
         }
+        temp = temp->next;
     }
 }
 
-void extractClusters(int graph[V][V]) {
-    bool visited[V];
-    
-    for (int i = 0; i < V; i++) {
-        visited[i] = false;
-    }
+void findConnectedComponents(struct Graph* graph) {
+    int componentCount = 0;
+    printf("\n--- Bulunan Bilesenler (Clusters) ---\n");
 
-    int clusterCount = 0;
-    printf("Graf üzerindeki kümeler:\n");
-
-    for (int i = 0; i < V; i++) {
-        if (!visited[i]) {
-            clusterCount++;
-            printf("Küme %d: ", clusterCount);
-            findCluster(graph, i, visited, clusterCount);
-            printf("\n");
+    for (int i = 0; i < graph->numVertices; i++) {
+        if (graph->visited[i] == 0) {
+            componentCount++;
+            printf("Cluster %d: { ", componentCount);
+            
+            DFS(graph, i);
+            
+            printf("}\n");
         }
     }
-    printf("\nToplam bulunan küme sayısı: %d\n", clusterCount);
+    printf("\nToplam %d adet bagli bilesen bulundu.\n", componentCount);
 }
 
 int main() {
-    int graph[V][V] = {
-        {0, 1, 1, 0, 0, 0},
-        {1, 0, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 1, 0},
-        {0, 0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0, 0}
-    };
+    struct Graph* graph = createGraph(9);
 
-    extractClusters(graph);
+    addEdge(graph, 0, 1);
+    addEdge(graph, 1, 2);
+    addEdge(graph, 1, 3);
+    addEdge(graph, 1, 4);
+    addEdge(graph, 2, 4);
+    addEdge(graph, 3, 4);
+
+    addEdge(graph, 5, 6);
+    addEdge(graph, 5, 8);
+    addEdge(graph, 6, 7);
+    addEdge(graph, 6, 8);
+
+    findConnectedComponents(graph);
 
     return 0;
 }
